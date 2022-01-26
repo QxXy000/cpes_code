@@ -1,0 +1,196 @@
+{
+    "load":{
+        "load_sort":1,
+        "building_area":{
+            "apartment":0,
+            "hotel":0,
+            "office":1,
+            "restaurant":0
+        },
+        "park_area":[1,2,3,4,5],
+        "power_peak":0,
+        "yearly_power":0,
+        "load_area":12000,
+        "load_proportion":{
+            "ele":0,
+            "heat":0,
+            "cold":0
+        },
+        "location":[112,16],
+        "detail_load":"load.csv"
+    },
+    "renewable_energy":{
+
+        "pv_existst":1000,
+        
+        "sc_existst":1000,
+        "pv_sc_max":100000
+    },
+    "price":{
+        "TOU_power":[0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.7, 
+            1, 1, 1, 1, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 1.2, 1.2, 1.2, 1.2, 1.2, 0.4],
+        "power_sale":0.5,
+        "gas_price":1.2,
+        "heat_price":12,
+        "cold_price":16,
+
+        "heat_mounth":5,
+        "cold_mounth":3,
+        "hydrogen_price":30,
+        "comment":""
+    },
+
+    "device":{
+        "co":
+            {
+                "power_max":5000,
+                "power_min":0,
+                "cost":1000,
+                "crf":10,
+
+                "beta_co":1.399
+            },
+        "fc":
+            {
+                "power_max":10000,
+                "power_min":0,
+                "cost":10000,
+                "crf":10,
+
+                "eta_fc_p":15,
+                "eta_ex_g":16.6,
+                "theta_ex":0.95
+
+            },
+        "ht":
+            {
+                "water_max":10000,
+                "water_min":0,
+                "cost":0.5,
+                "crf":20,
+
+                "t_max":82,
+                "t_min":4,
+                "t_supply":55,
+                "miu_loss":0.02
+            },
+
+        "eb":
+            {
+                "power_max":10000,
+                "power_min":0,
+                "cost":500,
+                "crf":10,
+
+                "beta_eb":0.9
+            },
+        "hp":
+            {
+                "power_max":10000,
+                "power_min":0,
+                "cost":3000,
+                "crf":15,
+
+                "beta_hpg":3,
+                "beta_hpq":4
+            },
+
+        "ghp":
+            {
+                "power_max":10000,
+                "power_min":0,
+                "cost":4000,
+                "crf":15,
+
+                "beta_ghpg":3.54,
+                "beta_ghpq":4
+            },
+
+        "gtw":
+            {
+                "number_max":200,
+                "cost":3000,
+                "crf":30,
+
+                "beta_gtw":7
+            },
+        "ct":
+            {
+                "water_max":10000,
+                "water_min":0,
+                "cost":0.5,
+                "crf":15,
+
+                "t_max":21,
+                "t_min":4,
+                "t_supply":7,
+                "miu_loss":0.9
+            },
+        "hst":
+            {
+                "sto_max":50000,
+                "stp_min":0,
+                "cost":3000,
+                "crf":15,
+
+                "inout_max":500,
+                "U_max":350,
+                "U_min":5
+            },
+
+        "el":
+            {
+                "power_max":5000,
+                "power_min":0,
+                "cost":10000,
+                "crf":7,
+
+                "beta_el":0.023,
+
+                "500RtV":0,
+                "U_max":200,
+                "U_min":20
+            },
+        "sc":
+            {
+                "area_max":10000,
+                "area_min":0,
+                "cost":2000,
+                "crf":20,
+
+                "beta_sc":0.55,
+                "theta_ex":0.9,
+                "a_stc":100,
+                "miu_loss":0.9
+            },
+
+        "pv":
+            {
+                "area_max":10000,
+                "area_min":0,
+                "cost":2000,
+                "crf":20,
+
+                "beta_pv":0.21
+            }
+
+
+    },
+    "storage_plan":{
+        "select":1,
+        "sigma":0.1,
+        "supply_time":4,
+        "pv_time":4
+    },
+    "mode":{
+        "optimal":1,
+        "storage_plan":1,
+        "isloate":1
+    },
+    "carbon":{
+        "alpha_h2":1.74,
+        "alpha_e":0.5839,
+        "alpha_EO":0.8922,
+        "alpha_gas":1.535
+    }
+}
