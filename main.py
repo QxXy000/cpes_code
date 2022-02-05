@@ -12,26 +12,82 @@ from chicken_op import *
 import json
 import os
 
-def read_load_file(filename):
-    ele_load = [0 for i in range(8760)]
+m_date = [31,28,31,30,31,30,31,31,30,31,30,31]
+m_date = [sum(m_date[:i])*24 for i in range(12)]
+m_date.append(8760)
+gb = {
+    "Apartment":{
+    #大面积旅馆
+        1:87,
+        2:68,
+        3:70,
+        4:94,
+        5:60
+    },
+    "Hotel":{
+        1:87,
+        2:75,
+        3:78,
+        4:95,
+        5:55
+    },
+    "Office":{
+        1:59,
+        2:39,
+        3:36,
+        4:34,
+        5:25
+    },
+    "restaurant":{
+        1:87,
+        2:75,
+        3:78,
+        4:95,
+        5:55
+    }
+}
+def read_load_file(filename,gb,load_sort,heat_mounth,cool_mounth):
+
+    ele_load = [1 for i in range(8760)]
     g_demand = [0 for i in range(8760)]
     q_demand = [0 for i in range(8760)]
-    r_solar =  [0 for i in range(8760+24)]
+    r_solar =  [1 for i in range(8760+24)]
+    for h in heat_mounth:
+        #print(m_date[h-1],m_date[h])
+        g_demand[m_date[h-1]:m_date[h]] = [1 for _ in range(m_date[h]-m_date[h-1])]
+    for cc in cool_mounth:
+        q_demand[m_date[cc-1]:m_date[cc]] = [1 for _ in range(m_date[cc]-m_date[cc-1])]
     with open("load/"+filename) as officecsv:
 
         office = csv.DictReader(officecsv)
         i=0
         for row in office:
-            ele_load[i] += float(row['Electricity Load [J]'])
-            q_demand[i] += float(row['Cooling Load [J]'])
-            g_demand[i] += float(row['Heating Load [J]'])
+            ele_load[i] *= float(row['Electricity Load [J]'])
+            q_demand[i] *= float(row['Cooling Load [J]'])
+            g_demand[i] *= float(row['Heating Load [J]'])
             
             i+=1
+
+    s = gb[load_sort]
+    tmp_sum = sum(ele_load)+sum(q_demand)/4+sum(g_demand)/0.95
+    kkk = s/tmp_sum
+    g_demand = [g_demand[i]*kkk for i in range(8760)]
+    q_demand = [q_demand[i]*kkk for i in range(8760)]
+    ele_load = [ele_load[i]*kkk for i in range(8760)]
     print(sum(g_demand),sum(q_demand),sum(ele_load))
     return ele_load,g_demand,q_demand
 
 def get_load_new(load_dict):
-
+    jing = float(load_dict["location"][0])
+    wei = float(load_dict["location"][1])
+    load_dict["load_sort"] = 5 if jing>106 and wei<25 else 2
+    if jing <106:
+        load_dict["load_sort"] = 4
+    if wei>35:
+        load_dict["load_sort"] = 3
+    if wei >=40 or (jing<101 and wei>28):
+        load_dict["load_sort"] = 1
+    print(load_dict["load_sort"])
     load_apartment = "ApartmentMidRise.csv"
     load_hotel     = "HotelSmall.csv"
     load_office    = "OfficeMedium.csv"
@@ -67,10 +123,13 @@ def get_load_new(load_dict):
     # print(load_office    )
     # print(load_restaurant)
     # exit(0)
-    e1,g1,q1 = read_load_file(load_apartment)
-    e2,g2,q2 = read_load_file(load_hotel)
-    e3,g3,q3 = read_load_file(load_office)
-    e4,g4,q4 = read_load_file(load_restaurant)
+    
+    #国标修正
+
+    e1,g1,q1 = read_load_file(load_apartment,gb["Apartment"],load_dict["load_sort"],load_dict["heat_mounth"],load_dict["cold_mounth"])
+    e2,g2,q2 = read_load_file(load_hotel,gb["Hotel"],load_dict["load_sort"],load_dict["heat_mounth"],load_dict["cold_mounth"])
+    e3,g3,q3 = read_load_file(load_office,gb["Office"],load_dict["load_sort"],load_dict["heat_mounth"],load_dict["cold_mounth"])
+    e4,g4,q4 = read_load_file(load_restaurant,gb["restaurant"],load_dict["load_sort"],load_dict["heat_mounth"],load_dict["cold_mounth"])
     #print(load_dict["load_sort"]["building_area"])
     sum_rate = load_dict["building_area"]["apartment"]+load_dict["building_area"]["hotel"]+load_dict["building_area"]["office"]+load_dict["building_area"]["restaurant"]
     rate1 = load_dict["load_area"]*load_dict["building_area"]["apartment"]/sum_rate
@@ -80,9 +139,9 @@ def get_load_new(load_dict):
     ele_load =  [e1[i]*rate1+e2[i]*rate2+e3[i]*rate3+e4[i]*rate4 for i in range(len(e1))]
     g_demand = [g1[i]*rate1+g2[i]*rate2+g3[i]*rate3+g4[i]*rate4 for i in range(len(e1))]
     q_demand = [q1[i]*rate1+q2[i]*rate2+q3[i]*rate3+q4[i]*rate4 for i in range(len(e1))]
-    q_demand[:92*24] = [0 for i in range(92*24)]
-    q_demand[-61*24:] = [0 for i in range(61*24)]
-    g_demand[92*24:92*24+212*24] = [0 for i in range(212*24)]
+    #q_demand[:92*24] = [0 for i in range(92*24)]
+    #q_demand[-61*24:] = [0 for i in range(61*24)]
+    #g_demand[92*24:92*24+212*24] = [0 for i in range(212*24)]
     period = len(e1)
     min_err = 10000
     files=os.listdir(r'solar')
@@ -236,23 +295,24 @@ def to_csv(res,filename):
 
 
 if __name__ == '__main__':
-
-    
-    #exit(0)
+    tem_env = 0#环境温度，后续补上
+    #print(m_date)
     with open("main_input.json",encoding = "utf-8") as load_file:
         input_json = json.load(load_file)
 
     #dict_load = get_load()
     dict_load = get_load_new(input_json["load"])
 
-    #exit(0)
-    #res1,grid_output_json,grid_operation_output_json,device_cap1 = planning_problem(dict_load, 0, input_json)
-    #print(output_json,operation_output_json)
-    output_json = operating_problem(dict_load, 1,0,0,input_json,8760)
-    print(output_json)
-    exit(0)
+    res1,grid_output_json,grid_operation_output_json,device_cap1 = planning_problem(dict_load, 0, input_json)
+    grid_operation_output_json = operating_problem(dict_load, device_cap1,0,tem_env,input_json,8760)
+
+
     res2,isloat_output_json,isloate_operation_output_json,device_cap2 = planning_problem(dict_load, 1, input_json)
-    print(device_cap1,device_cap2)
+    isloate_operation_output_json = operating_problem(dict_load, device_cap2,1,tem_env,input_json,8760)
+
+    #print(111)
+    print(device_cap1)
+    print(device_cap2)
     print(grid_operation_output_json,isloate_operation_output_json)
     #output_json = operating_problem(dict_load, device_cap, 1, tmp_env, input_json)
 

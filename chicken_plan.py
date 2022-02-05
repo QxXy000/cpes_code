@@ -134,7 +134,7 @@ def planning_problem(dict,isloate,input_json):
     k_el = input_json['device']['el']['beta_el']
 
     k_hp_g = input_json['device']['hp']['beta_hpg']
-    k_hp_q = input_json['device']['hp']['beta_hp1']
+    k_hp_q = input_json['device']['hp']['beta_hpq']
     k_hpg_g = input_json['device']['ghp']['beta_ghpg']
     k_hpg_q = input_json['device']['ghp']['beta_ghpq']
     k_eb = input_json['device']['eb']['beta_eb']
@@ -189,16 +189,16 @@ def planning_problem(dict,isloate,input_json):
 
 
     p_hp = [m.addVar(vtype=GRB.CONTINUOUS, lb=0,name=f"p_hp{t}") for t in range(period)]#热泵产热耗电 ub = 268,
-    p_hp_max = m.addVar(vtype=GRB.CONTINUOUS, lb=0, name=f"p_hp_max")
+    p_hp_max = m.addVar(vtype=GRB.CONTINUOUS, lb=0,ub = input_json["device"]["hp"]["power_max"], name=f"p_hp_max")
 
     p_hpc = [m.addVar(vtype=GRB.CONTINUOUS, lb=0, name=f"p_hpc{t}") for t in range(period)]#热泵产冷的耗电,ub = 202
-    p_hpc_max = m.addVar(vtype=GRB.CONTINUOUS, lb=0,  name=f"p_hpc_max")
+    p_hpc_max = m.addVar(vtype=GRB.CONTINUOUS, lb=0,ub = input_json["device"]["hp"]["power_max"],  name=f"p_hpc_max")
 
     p_hpg = [m.addVar(vtype=GRB.CONTINUOUS, lb=0,name=f"p_hpg{t}") for t in range(period)]#热泵产热耗电 ub = 268,
-    p_hpg_max = m.addVar(vtype=GRB.CONTINUOUS, lb=0, name=f"p_hpg_max")
+    p_hpg_max = m.addVar(vtype=GRB.CONTINUOUS, lb=0,ub = input_json["device"]["ghp"]["power_max"], name=f"p_hpg_max")
 
     p_hpgc = [m.addVar(vtype=GRB.CONTINUOUS, lb=0, name=f"p_hpgc{t}") for t in range(period)]#热泵产冷的耗电,ub = 202
-    p_hpgc_max = m.addVar(vtype=GRB.CONTINUOUS, lb=0,  name=f"p_hpgc_max")
+    p_hpgc_max = m.addVar(vtype=GRB.CONTINUOUS, lb=0,ub = input_json["device"]["ghp"]["power_max"],  name=f"p_hpgc_max")
 
 
     m_hp = [m.addVar(vtype=GRB.CONTINUOUS, lb=0, name=f"m_hp{t}") for t in range(period)]#热泵供热换水量
@@ -208,12 +208,12 @@ def planning_problem(dict,isloate,input_json):
 
     p_eb = [m.addVar(vtype=GRB.CONTINUOUS, lb=0, name=f"p_eb{t}") for t in range(period)]#电锅炉耗电
 
-    p_eb_max = m.addVar(vtype=GRB.CONTINUOUS, lb=0, name=f"p_eb_max")
+    p_eb_max = m.addVar(vtype=GRB.CONTINUOUS, lb=0,ub = input_json["device"]["eb"]["power_max"], name=f"p_eb_max")
 
     g_eb = [m.addVar(vtype=GRB.CONTINUOUS, lb=0, name=f"g_eb{t}") for t in range(period)]#电锅炉产热
 
     p_co = [m.addVar(vtype=GRB.CONTINUOUS, lb=0, name=f"p_co{t}") for t in range(period)]
-    p_co_max = m.addVar(vtype=GRB.CONTINUOUS, lb=0, name=f"p_co_max")
+    p_co_max = m.addVar(vtype=GRB.CONTINUOUS, lb=0,ub = input_json["device"]["co"]["power_max"], name=f"p_co_max")
     p_pv = [m.addVar(vtype=GRB.CONTINUOUS, lb=0, name=f"p_pv{t}") for t in range(period)]
 
     t_ht = [m.addVar(vtype=GRB.CONTINUOUS, lb=55, ub = 90 ,name=f"t_ht{t}") for t in range(period)] # temperature of hot water tank
@@ -405,6 +405,7 @@ def planning_problem(dict,isloate,input_json):
     m.params.NonConvex = 2
     m.params.MIPGap = 0.01
     # m.optimize()
+    #print(m.status)
     if m.status == GRB.INFEASIBLE:
         print('Model is infeasible')
         m.computeIIS()
@@ -419,7 +420,7 @@ def planning_problem(dict,isloate,input_json):
     op_c = sum([(ele_load[i]+g_demand[i]/k_eb+q_demand[i]/k_hpg_q)*lambda_ele_in[i] for i in range(period)])
     cap_sum = s_pv.X*cost_pv +s_sc.X*cost_sc +p_hpg_max.X*cost_hpg +cost_gtw*num_gtw.X +cost_ht*m_ht.X+cost_ht*m_ct.X+cost_hst*hst.X+cost_eb*p_eb_max.X+cost_hp*p_hp_max.X+capex_fc.X+capex_el.X+p_co_max.X*cost_co
     op_sum = sum([p_pur[i].X*lambda_ele_in[i] for i in range(period)])-sum([p_sol[i].X for i in range(period)])*lambda_ele_out+lambda_h*sum([h_pur[i].X for i in range(period)])
-    revenue = input_json['load']['load_area']*(input_json['price']['heat_price']*input_json['price']['heat_mounth']+input_json['price']['cold_price']*input_json['price']['cold_mounth'])
+    revenue = input_json['load']['load_area']*(input_json['price']['heat_price']*len(input_json['load']['heat_mounth'])+input_json['price']['cold_price']*len(input_json['load']['cold_mounth']))
     #s_heat_sto = [q_hp[i].X - g_hp[i].X for i in range(period)]
     # for i in range(period-1):
     #     s_heat_sto[i+1]+=s_heat_sto[i]

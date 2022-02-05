@@ -1,12 +1,13 @@
 {
     "load":{
-        "load_sort":1,
         "building_area":{
             "apartment":0,
             "hotel":0,
             "office":1,
             "restaurant":0
         },
+        "heat_mounth":[1,2,3,10,11,12],
+        "cold_mounth":[6,7,8,9],
         "park_area":[1,2,3,4,5],
         "power_peak":0,
         "yearly_power":0,
@@ -34,8 +35,7 @@
         "heat_price":12,
         "cold_price":16,
 
-        "heat_mounth":5,
-        "cold_mounth":3,
+
         "hydrogen_price":30,
         "comment":""
     },
@@ -158,10 +158,10 @@
                 "cost":2000,
                 "crf":20,
 
-                "beta_sc":0.55,
+                "beta_sc":0.72,
                 "theta_ex":0.9,
                 "a_stc":100,
-                "miu_loss":0.9
+                "miu_loss":0.0064
             },
 
         "pv":

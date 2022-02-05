@@ -32,7 +32,7 @@ def season_operating_problem(dict_load,device_cap,isolate,tem_env,input_json,per
     lambda_h = 35
     lambda_carbon = 0.06
 
-    p_transformer = 1000
+    p_transformer = 100000
 
     alpha_e = 0.5839#电网排放因子kg/kWh
     alpha_gas = 1.535#天然气排放因子kg/Nm3
@@ -96,19 +96,19 @@ def season_operating_problem(dict_load,device_cap,isolate,tem_env,input_json,per
     
     A_stc=100#输入的参数，防冻液管与外界接触的表面积
     S_stc=100#输入的参数，太阳能集热板吸收太阳能的面积
-    S_pv=200#输入的参数，光伏表面积
-    m_wt=20000#输入的参数，热水罐质量容量
-    m_ct=20000#输入的参数，冷水罐质量容量
-    m_inout_upper = 20#输入的参数，储氢罐质量容量
-    p_el_nominal = 150#输入的参数，电解槽额定功率
-    p_fc_nominal = 120#输入的参数，燃料电池额定功率
-    p_eb_nominal=40000000#输入的参数，电锅炉额定功率
-    p_hp_nominal=40000000#输入的参数，空气源热泵额定功率
-    p_ghp_nominal=40000000#输入的参数，地源热泵额定功率
-    p_co_nominal=40000000#输入的参数，地源热泵额定功率
+    S_pv=device_cap["area_pv"] #输入的参数，光伏表面积
+    m_wt=device_cap["m_ht"] #输入的参数，热水罐质量容量
+    m_ct=device_cap["m_ct"] #输入的参数，冷水罐质量容量
+    m_inout_upper = device_cap["hst"] #输入的参数，储氢罐质量容量
+    p_el_nominal = device_cap["p_el_max"] #输入的参数，电解槽额定功率
+    p_fc_nominal = device_cap["p_fc_max"] #输入的参数，燃料电池额定功率
+    p_eb_nominal= device_cap["p_eb_max"] #输入的参数，电锅炉额定功率
+    p_hp_nominal= device_cap["p_hp_max"]#输入的参数，空气源热泵额定功率
+    p_ghp_nominal=device_cap["p_hpg_max"]#输入的参数，地源热泵额定功率
+    p_co_nominal=device_cap["p_co"]#输入的参数，地源热泵额定功率
     
-    coeff_el_h2u=u_el_upper/k_el/p_el_nominal#输出氢气质量换算成压强的系数
-    coeff_ht_h2u=u_ht_upper/m_inout_upper#储氢罐氢气换算成压强系数
+    coeff_el_h2u=u_el_upper/k_el/p_el_nominal if p_el_nominal!=0 else 100000 #输出氢气质量换算成压强的系数
+    coeff_ht_h2u=u_ht_upper/m_inout_upper if m_inout_upper!=0 else 100000#储氢罐氢气换算成压强系数
     m_fc_w=ro_wt*V_c#燃料电池回路水的质量
     m_stc=ro_wt*V_stc#太阳能集热器水的质量
     m_stc_ex=ro_wt*V_stc_ex#太阳能集热器回路水的质量
@@ -231,10 +231,10 @@ def season_operating_problem(dict_load,device_cap,isolate,tem_env,input_json,per
     v_gas=[probV6.addVar(vtype=GRB.CONTINUOUS,name=f"v_gas{i}") for i in range(period)]
     
     m_ht=[probV6.addVar(lb=0,vtype=GRB.CONTINUOUS,name=f"m_ht{i}") for i in range(period+1)]
-
+    p_slack=[probV6.addVar(lb=0,vtype=GRB.CONTINUOUS,name=f"p_slack{i}") for i in range(period+1)]#有时候会因为电太多而infeasible，增加弃电量
     probV6.setObjective(gp.quicksum([p_g[i]*lambda_ele_in[i] for i in range(period)])-gp.quicksum(p_u)*lambda_ele_out+gp.quicksum(m_b)*lambda_h,GRB.MINIMIZE)
-    probV6.addConstr(m_ht[0]==5)#定义初状态
-    probV6.addConstr(m_ht[period]==m_ht[0])#最终状态等于0状态
+    #probV6.addConstr(m_ht[0]==5)#定义初状态
+    probV6.addConstr(m_ht[-1]==m_ht[0])#最终状态等于0状态
     
     
     
@@ -243,7 +243,7 @@ def season_operating_problem(dict_load,device_cap,isolate,tem_env,input_json,per
         probV6.addConstr(p_g[i] <= (1-isolate)*z_g[i]*p_transformer)#（7）V6.5(5)
         probV6.addConstr(p_u[i] <= (1-isolate)*z_u[i]*p_transformer)#（7）
 
-        probV6.addConstr(p_g[i] + k_pv*S_pv*r_solar[i] + p_fc[i] == p_el[i] + p_u[i] + p_co[i] + ele_load[i] + p_eb[i] + p_hp[i] + p_ghp[i])#（2），发电=用电V6.5(3)
+        probV6.addConstr(p_g[i] + k_pv*S_pv*r_solar[i] + p_fc[i] == p_slack[i] + p_el[i] + p_u[i] + p_co[i] + ele_load[i] + p_eb[i] + p_hp[i] + p_ghp[i])#（2），发电=用电V6.5(3)
         probV6.addConstr(m_b[i] + m_el[i] + m_out[i] == m_in[i] + m_fc[i])#（5），产氢=耗氢V6.5(2)
 
         # fuel cell
@@ -309,7 +309,7 @@ def season_operating_problem(dict_load,device_cap,isolate,tem_env,input_json,per
         probV6.addConstr(p_el[i] <= p_el_nominal)
         probV6.addConstr(u_el[i] == coeff_el_h2u * m_el[i])#V6.5(7)
         probV6.addConstr(z_el[i] * u_el_lower <= u_el[i])
-        probV6.addConstr(z_el[i] * u_el_upper >= u_el[i])
+        #probV6.addConstr(z_el[i] * u_el_upper >= u_el[i])
 
         #H2 Tank
         probV6.addConstr(z_in[i] + z_out[i] <= 1)#(16)V6.5(9)
@@ -318,7 +318,7 @@ def season_operating_problem(dict_load,device_cap,isolate,tem_env,input_json,per
         probV6.addConstr(m_ht[i+1] - m_ht[i] == m_in[i] - m_out[i])#V6.5(12)
         probV6.addConstr(u_ht[i] == coeff_ht_h2u * m_ht[i])#V6.5(13)
         probV6.addConstr(u_ht[i] <= u_ht_upper)#V6.5(14)
-        probV6.addConstr(u_ht[i] >= u_ht_lower)
+        #probV6.addConstr(u_ht[i] >= u_ht_lower)
 
         #Hot Water Tank
         probV6.addConstr(c*m_wt*(t_wt[i+1]-t_wt[i])==g_inout[i]-g_loss[i])#V6.5(22)
@@ -408,6 +408,15 @@ def season_operating_problem(dict_load,device_cap,isolate,tem_env,input_json,per
         probV6.optimize()
     except gp.GurobiError:
         print("Optimize failed due to non-convexity")
+    print(probV6.status)
+    print("----")
+    #input()
+    if probV6.status == GRB.INFEASIBLE or probV6.status == 4:
+        print('Model is infeasible111')
+        probV6.computeIIS()
+        probV6.write('model.ilp')
+        print("Irreducible inconsistent subsystem is written to file 'model.ilp'")
+
     #prob.solve(pulp.GUROBI_CMD(options=[('MIPgap',0.0001)]))
 
     #print('status:', pulp.LpStatus[prob.status])

@@ -1,0 +1,27 @@
+\ Model OperatingModelV6_copy
+\ LP format - for model browsing. Use MPS format to capture full model detail.
+Minimize
+ 
+Subject To
+ R8095: p_u68 <= 0
+ R8096: p_g68 - p_u68 + p_fc68 - p_el68 - p_co68 - p_eb68 - p_hp68
+   - p_ghp68 = -11612.14273274996
+ R8149: - 1.399 m_in68 + p_co68 = 0
+ R8151: p_el68 <= 0
+ R8155: m_in68 <= 0
+ R8191: - 0.95 p_eb68 = 0
+ R8195: p_hp68 <= 43.45191014142418
+ R8199: - 3.54 p_ghp_g68 = 0
+ R8202: - 4 p_ghp_q68 = 0
+ R8205: - p_ghp68 + p_ghp_g68 + p_ghp_q68 = 0
+Bounds
+ m_in68 free
+ p_u68 free
+ p_el68 free
+ p_co68 free
+ p_eb68 free
+ p_hp68 free
+ p_ghp68 free
+ p_ghp_g68 free
+ p_ghp_q68 free
+End
