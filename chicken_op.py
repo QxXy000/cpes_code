@@ -28,8 +28,9 @@ def season_operating_problem(dict_load,device_cap,isolate,tem_env,input_json,per
     # power price in summer
     lambda_ele_in = [0.4096, 0.4096, 0.4096, 0.4096, 0.4096, 0.4096, 0.4096, 0.7704, 1.1313, 1.1313, 1.1313, 1.1313,
                      0.7704, 0.7704, 0.7704, 0.7704, 0.7704, 0.7704, 1.1313, 1.1313, 1.1313, 1.1313, 1.1313, 0.4096] * 7
-    lambda_ele_out = 0.18
-    lambda_h = 35
+    lambda_ele_in = input_json['price']['TOU_power']*7
+    lambda_ele_out = input_json['price']['power_sale']
+    lambda_h = input_json['price']['hydrogen_price']
     lambda_carbon = 0.06
 
     p_transformer = 100000
@@ -44,7 +45,7 @@ def season_operating_problem(dict_load,device_cap,isolate,tem_env,input_json,per
     k_pv=0.21#光伏效率
     k_co=1.399#压缩机COP1.399kWh/kg
     k_el = 0.022
-    k_stc=0.55#集热器效率
+    k_stc=input_json['device']['sc']['beta_sc']#集热器效率
     k_eb=0.95#电锅炉效率COP
     miu_stc_loss=0.035#集热器损耗系数
     miu_loss=0.02#W(m2*K)热水罐损耗系数
@@ -95,7 +96,7 @@ def season_operating_problem(dict_load,device_cap,isolate,tem_env,input_json,per
     
     
     A_stc=100#输入的参数，防冻液管与外界接触的表面积
-    S_stc=100#输入的参数，太阳能集热板吸收太阳能的面积
+    S_stc=device_cap["area_sc"]#输入的参数，太阳能集热板吸收太阳能的面积
     S_pv=device_cap["area_pv"] #输入的参数，光伏表面积
     m_wt=device_cap["m_ht"] #输入的参数，热水罐质量容量
     m_ct=device_cap["m_ct"] #输入的参数，冷水罐质量容量
@@ -240,8 +241,9 @@ def season_operating_problem(dict_load,device_cap,isolate,tem_env,input_json,per
     
     for i in range(period):
         probV6.addConstr(z_g[i]+z_u[i]<=1)#(6)式，电网购电或上电V6.5(4)
-        probV6.addConstr(p_g[i] <= (1-isolate)*z_g[i]*p_transformer)#（7）V6.5(5)
-        probV6.addConstr(p_u[i] <= (1-isolate)*z_u[i]*p_transformer)#（7）
+        probV6.addConstr(p_g[i] <= (isolate[0])*z_g[i]*p_transformer)#（7）V6.5(5)
+        probV6.addConstr(p_u[i] <= (isolate[1])*z_u[i]*p_transformer)#（7）
+        probV6.addConstr(m_b[i] <= (isolate[2])*z_u[i]*p_transformer)#（7）
 
         probV6.addConstr(p_g[i] + k_pv*S_pv*r_solar[i] + p_fc[i] == p_slack[i] + p_el[i] + p_u[i] + p_co[i] + ele_load[i] + p_eb[i] + p_hp[i] + p_ghp[i])#（2），发电=用电V6.5(3)
         probV6.addConstr(m_b[i] + m_el[i] + m_out[i] == m_in[i] + m_fc[i])#（5），产氢=耗氢V6.5(2)
@@ -482,14 +484,14 @@ def operating_problem(dict_load,device_cap,isolate,tem_env,input_json,period):
     
     #第三步算结果
     output_json = {
-            "operation_cost": opex_sum,  # 年化运行成本/万元
-            "cost_save_rate": (opex_ele_only-opex_sum)/opex_ele_only,  #电运行成本节约比例
-            "cost_save_rate_gas": (opex_ele_gas-opex_sum)/opex_ele_gas,  #电气运行成本节约比例
-            "co2":ce_sum,  #总碳排/t
-            "cer":(co2_ele_only-ce_sum)/co2_ele_only,  #与电系统相比的碳减排率
-            "cer_gas":(co2_ele_gas-ce_sum)/co2_ele_gas, #与电气系统相比的碳减排率
-            "cer_perm2":(co2_ele_only-ce_sum)/area,  #电系统每平米的碳减排量/t
-            "cer_perm2_gas":(co2_ele_gas-ce_sum)/area  #电气系统每平米的碳减排量/t
+            "operation_cost": format(opex_sum,'.2f'),  # 年化运行成本/万元
+            "cost_save_rate": format((opex_ele_only-opex_sum)/opex_ele_only,'.4f'),  #电运行成本节约比例
+            "cost_save_rate_gas": format((opex_ele_gas-opex_sum)/opex_ele_gas,'.4f'),  #电气运行成本节约比例
+            "co2":format(ce_sum,'.2f'),  #总碳排/t
+            "cer":format((co2_ele_only-ce_sum)/co2_ele_only,'.4f'),  #与电系统相比的碳减排率
+            "cer_gas":format((co2_ele_gas-ce_sum)/co2_ele_gas,'.4f'), #与电气系统相比的碳减排率
+            "cer_perm2":format((co2_ele_only-ce_sum)/area,'.2f'),  #电系统每平米的碳减排量/t
+            "cer_perm2_gas":format((co2_ele_gas-ce_sum)/area,'.2f')  #电气系统每平米的碳减排量/t
     }
 
     return output_json

@@ -11,6 +11,9 @@ from chicken_plan import *
 from chicken_op import *
 import json
 import os
+import pprint
+
+res_dict = "res/"
 
 m_date = [31,28,31,30,31,30,31,31,30,31,30,31]
 m_date = [sum(m_date[:i])*24 for i in range(12)]
@@ -290,10 +293,15 @@ def to_csv(res,filename):
             total.write(1,i,res[items[i]])
 
     #filename = 'res/chicken_plan_2_load_1' + '.xls'
-    wb.save(filename)
+    wb.save(res_dict+filename)
 
 
-
+def save_json(j,name):
+    jj = json.dumps(j)
+    f = open(res_dict+name+".json",'w')
+    f.write(jj)
+    f.close()
+    return 0
 if __name__ == '__main__':
     tem_env = 0#环境温度，后续补上
     #print(m_date)
@@ -303,17 +311,26 @@ if __name__ == '__main__':
     #dict_load = get_load()
     dict_load = get_load_new(input_json["load"])
 
-    res1,grid_output_json,grid_operation_output_json,device_cap1 = planning_problem(dict_load, 0, input_json)
-    grid_operation_output_json = operating_problem(dict_load, device_cap1,0,tem_env,input_json,8760)
+    #买电，卖电，买氢
 
+    res1,grid_planning_output_json,grid_operation_output_json_plan,device_cap1 = planning_problem(dict_load, [1,1,1], input_json)
+    grid_operation_output_json = operating_problem(dict_load, device_cap1,[1,1,1],tem_env,input_json,8760)
+    save_json(grid_planning_output_json,"grid_planning_output_json")
+    save_json(grid_operation_output_json,"grid_operation_output_json")
 
-    res2,isloat_output_json,isloate_operation_output_json,device_cap2 = planning_problem(dict_load, 1, input_json)
-    isloate_operation_output_json = operating_problem(dict_load, device_cap2,1,tem_env,input_json,8760)
+    
+    res2,itgrid_planning_output_json,isloate_operation_output_json_plan,device_cap2 = planning_problem(dict_load, [0,1,1], input_json)
+    isloate_operation_output_json = operating_problem(dict_load, device_cap2,[0,1,1],tem_env,input_json,8760)
 
     #print(111)
-    print(device_cap1)
-    print(device_cap2)
-    print(grid_operation_output_json,isloate_operation_output_json)
+    print(grid_planning_output_json['equipment_cost'],grid_planning_output_json['receive_year'])
+    print(itgrid_planning_output_json['equipment_cost'],itgrid_planning_output_json['receive_year'])
+    pprint.pprint(device_cap1)
+    pprint.pprint(device_cap2)
+    pprint.pprint(grid_operation_output_json)
+    pprint.pprint(grid_operation_output_json_plan)
+    pprint.pprint(itgrid_operation_output_json)
+    pprint.pprint(isloate_operation_output_json_plan)
     #output_json = operating_problem(dict_load, device_cap, 1, tmp_env, input_json)
 
     #output_json = operating_problem(dict_load, device_cap, 0, tmp_env, input_json)
@@ -321,6 +338,10 @@ if __name__ == '__main__':
     
 
 
-    to_csv(res1,'test1' + '.xls')
-    to_csv(res2,'test2' + '.xls')
+
+    save_json(itgrid_planning_output_json,"itgrid_planning_output_json")
+
+    save_json(itgrid_operation_output_json,"itgrid_operation_output_json")
+    #to_csv(res1,'test1' + '.xls')
+    #to_csv(res2,'test2' + '.xls')
 

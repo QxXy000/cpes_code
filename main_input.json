@@ -17,27 +17,26 @@
             "heat":0,
             "cold":0
         },
-        "location":[112,16],
+        "location":[110,41],
         "detail_load":"load.csv"
     },
     "renewable_energy":{
 
-        "pv_existst":1000,
+        "pv_existst":0,
         
-        "sc_existst":1000,
-        "pv_sc_max":100000
+        "sc_existst":0,
+        "pv_sc_max":476190
     },
     "price":{
-        "TOU_power":[0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.7, 
-            1, 1, 1, 1, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 1.2, 1.2, 1.2, 1.2, 1.2, 0.4],
-        "power_sale":0.5,
+        "TOU_power":[0.6713,0.6713,0.6713,0.6713,0.6713,0.9935,0.9935,0.6713,0.6713,0.6713,0.3155,0.3155,0.3155,0.3155,0.3155,0.6713,0.6713,0.9935,0.9935,0.9935,0.9935,0.6713,0.6713,0.6713],
+        "power_sale":0.9,
         "gas_price":1.2,
         "heat_price":12,
         "cold_price":16,
 
 
         "hydrogen_price":30,
-        "comment":""
+        "capex_max":900000000
     },
 
     "device":{
@@ -64,7 +63,7 @@
             },
         "ht":
             {
-                "water_max":10000,
+                "water_max":1800000,
                 "water_min":0,
                 "cost":0.5,
                 "crf":20,
@@ -116,7 +115,7 @@
             },
         "ct":
             {
-                "water_max":10000,
+                "water_max":1800000,
                 "water_min":0,
                 "cost":0.5,
                 "crf":15,
@@ -129,7 +128,7 @@
         "hst":
             {
                 "sto_max":50000,
-                "stp_min":0,
+                "sto_min":0,
                 "cost":3000,
                 "crf":15,
 
@@ -166,7 +165,7 @@
 
         "pv":
             {
-                "area_max":10000,
+                "area_max":476190,
                 "area_min":0,
                 "cost":2000,
                 "crf":20,
