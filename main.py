@@ -315,10 +315,9 @@ if __name__ == '__main__':
 
     res1,grid_planning_output_json,grid_operation_output_json_plan,device_cap1 = planning_problem(dict_load, [1,1,1], input_json)
     grid_operation_output_json = operating_problem(dict_load, device_cap1,[1,1,1],tem_env,input_json,8760)
-    save_json(grid_planning_output_json,"grid_planning_output_json")
-    save_json(grid_operation_output_json,"grid_operation_output_json")
 
-    
+
+
     res2,itgrid_planning_output_json,isloate_operation_output_json_plan,device_cap2 = planning_problem(dict_load, [0,1,1], input_json)
     isloate_operation_output_json = operating_problem(dict_load, device_cap2,[0,1,1],tem_env,input_json,8760)
 
@@ -338,9 +337,9 @@ if __name__ == '__main__':
     
 
 
-
+    save_json(grid_planning_output_json,"grid_planning_output_json")
+    save_json(grid_operation_output_json,"grid_operation_output_json")
     save_json(itgrid_planning_output_json,"itgrid_planning_output_json")
-
     save_json(itgrid_operation_output_json,"itgrid_operation_output_json")
     #to_csv(res1,'test1' + '.xls')
     #to_csv(res2,'test2' + '.xls')
