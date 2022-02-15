@@ -488,10 +488,11 @@ def operating_problem(dict_load,device_cap,isolate,tem_env,input_json,period):
             "cost_save_rate": format((opex_ele_only-opex_sum)/opex_ele_only,'.4f'),  #电运行成本节约比例
             "cost_save_rate_gas": format((opex_ele_gas-opex_sum)/opex_ele_gas,'.4f'),  #电气运行成本节约比例
             "co2":format(ce_sum,'.2f'),  #总碳排/t
-            "cer":format((co2_ele_only-ce_sum)/co2_ele_only,'.4f'),  #与电系统相比的碳减排率
+            "cer_rate":format((co2_ele_only-ce_sum)/co2_ele_only,'.4f'),  #与电系统相比的碳减排率
             "cer_gas":format((co2_ele_gas-ce_sum)/co2_ele_gas,'.4f'), #与电气系统相比的碳减排率
             "cer_perm2":format((co2_ele_only-ce_sum)/area,'.2f'),  #电系统每平米的碳减排量/t
-            "cer_perm2_gas":format((co2_ele_gas-ce_sum)/area,'.2f')  #电气系统每平米的碳减排量/t
+            "cer_perm2_gas":format((co2_ele_gas-ce_sum)/area,'.2f'),  #电气系统每平米的碳减排量/t
+            "cer":format(co2_ele_only-ce_sum,'.4f')
     }
 
     return output_json

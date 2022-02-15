@@ -13,7 +13,7 @@ import json
 import os
 import pprint
 
-res_dict = "res/"
+res_dict = "doc/"
 
 m_date = [31,28,31,30,31,30,31,31,30,31,30,31]
 m_date = [sum(m_date[:i])*24 for i in range(12)]

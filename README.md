@@ -2,7 +2,11 @@
 
 本项目为半自动计算综合能源系统测算报告的测算部分代码。
 
-通过`main_input.json`进行配置，运行`main.py`进行计算
+# 使用方法
+
+通过`main_input.json`进行配置，运行`main_calc.py`进行计算,计算结果被输出到doc子目录下。
+第二步运行doc下的`main.py`输出`out.docx`。
+
 # 输入配置文件说明
 配置文件包`main_input.json`。具体配置说明如下。
 
