@@ -480,12 +480,12 @@ def planning_problem(dict,isloate,input_json):
 
     #规划输出
     output_json = {
-            'ele_load_sum': sum(ele_load),  # 电负荷总量/kwh
-            'g_demand_sum': sum(g_demand),  # 热负荷总量/kwh
-            'q_demand_sum': sum(q_demand),  # 冷负荷总量/kwh
-            'ele_load_max': max(ele_load),  # 电负荷峰值/kwh
-            'g_demand_max': max(g_demand),  # 热负荷峰值/kwh
-            'q_demand_max': max(q_demand),  # 冷负荷峰值/kwh
+            'ele_load_sum': format(sum(ele_load),'.2f'),  # 电负荷总量/kwh
+            'g_demand_sum': format(sum(g_demand),'.2f'),  # 热负荷总量/kwh
+            'q_demand_sum': format(sum(q_demand),'.2f'),  # 冷负荷总量/kwh
+            'ele_load_max': format(max(ele_load),'.2f'),  # 电负荷峰值/kwh
+            'g_demand_max': format(max(g_demand),'.2f'),  # 热负荷峰值/kwh
+            'q_demand_max': format(max(q_demand),'.2f'),  # 冷负荷峰值/kwh
             'ele_load': ele_load,  # 电负荷8760h的分时数据/kwh
             'g_demand': g_demand,  # 热负荷8760h的分时数据/kwh
             'q_demand': q_demand,  # 冷负荷8760h的分时数据/kwh

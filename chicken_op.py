@@ -1,5 +1,4 @@
 # %load main.py
-import pulp
 import sys
 import numpy as np
 import random

@@ -2,7 +2,7 @@
     "load":{
         "building_area":{
             "apartment":0,
-            "hotel":0,
+            "hotel":5,
             "office":1,
             "restaurant":0
         },
@@ -11,7 +11,7 @@
         "park_area":[1,2,3,4,5],
         "power_peak":0,
         "yearly_power":0,
-        "load_area":12000,
+        "load_area":14000,
         "load_proportion":{
             "ele":0,
             "heat":0,
@@ -36,7 +36,7 @@
 
 
         "hydrogen_price":30,
-        "capex_max":900000000
+        "capex_max":90000000
     },
 
     "device":{

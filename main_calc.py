@@ -319,7 +319,7 @@ if __name__ == '__main__':
 
 
     res2,itgrid_planning_output_json,isloate_operation_output_json_plan,device_cap2 = planning_problem(dict_load, [0,1,1], input_json)
-    isloate_operation_output_json = operating_problem(dict_load, device_cap2,[0,1,1],tem_env,input_json,8760)
+    itgrid_operation_output_json = operating_problem(dict_load, device_cap2,[0,1,1],tem_env,input_json,8760)
 
     #print(111)
     print(grid_planning_output_json['equipment_cost'],grid_planning_output_json['receive_year'])
