@@ -1,11 +1,21 @@
 # cpes_code
 
-本项目为半自动计算综合能源系统测算报告的测算部分代码。
+本项目为半自动计算综合能源系统测算报告的测算部分代码。1111111
 
 # 使用方法
 
-通过`main_input.json`进行配置，运行`main_calc.py`进行计算,计算结果被输出到doc子目录下。
-第二步运行doc下的`main.py`输出`out.docx`。
+## 修改配置文件
+通过`main_input.json`进行配置，主要是负荷和可再生能源和价格部分。
+
+## 运行主计算程序
+运行`main_calc.py`进行计算,计算结果被输出到doc子目录下。
+
+## 修改文档相关文字
+修改doc文件夹下的xlsx文件
+
+## 运行文档生成程序
+运行doc下的`main.py`输出`out.docx`，为最终输出的文档。
+
 
 # 输入配置文件说明
 配置文件包`main_input.json`。具体配置说明如下。
@@ -15,7 +25,7 @@
 
 ### 负荷部分
 
-输入,`building_area`为各个类型房屋的比例；`heat_mounth,cold_mounth`为供热和供冷的月份，`park_area`为各个类型工厂比例，还没有实现，`power_peak`为峰值电负荷，缺省为0;`yearly_power`为年用电总量;`load_area`为总用能面积，非常关键;`load_proportion`为电热冷负荷的比例，缺省为0，还未实现;`location`为坐标经纬度，用于获取当地光照水平以及供暖条件；。
+输入,`building_area`为各个类型房屋的比例；`heat_mounth,cold_mounth`为供热和供冷的月份，`power_peak`为峰值电负荷，缺省为0;`yearly_power`为年用电总量;`load_area`为总用能面积，非常关键;`load_proportion`为电热冷负荷的比例，缺省为0，还未实现;`location`为坐标经纬度，第一个为经度，第二个为纬度。用于获取当地光照水平以及供暖条件；。
 ```
     "load":{
         "building_area":{
@@ -26,7 +36,6 @@
         },
         "heat_mounth":[1,2,3,10,11,12],
         "cold_mounth":[6,7,8,9],
-        "park_area":[1,2,3,4,5],
         "power_peak":0,
         "yearly_power":0,
         "load_area":12000,
@@ -36,7 +45,6 @@
             "cold":0
         },
         "location":[110,41],
-        "detail_load":"load.csv"
     },
 ```
 
@@ -45,9 +53,7 @@
 `pv_existst`为已有光伏装机容量功率；`sc_existst`为已有的太阳能集热器面积；`pv_sc_max`为光伏板和集热器一共的最大面积。
 ```
     "renewable_energy":{
-
         "pv_existst":1000,
-        
         "sc_existst":1000,
         "pv_sc_max":100000
     },
@@ -55,22 +61,19 @@
 
 ### 市场价格部分
 
-第一项`TOU_power`为数组，代表24h分时电价，第二项`power_sale`为卖电价格；第三项`heat_price`为供热价格，单位是元/平方米；第四项`cold_price`为供冷价格；第五项`hydrogen_price`为氢价，单位是元/kg。
+第一项`TOU_power`为数组，代表24h分时电价，第二项`power_sale`为卖电价格；`gas_price`是买天然气价格；`heat_price`为供热价格，单位是元/平方米每月；`cold_price`为供冷价格；第五项`hydrogen_price`为氢价，单位是元/kg；`capex_max`是投资成本上限，不需要上限可以设置为非常大。
 ```
     "price":{
-        "TOU_power":[0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.7, 
-            1, 1, 1, 1, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 1.2, 1.2, 1.2, 1.2, 1.2, 0.4],
-        //分时电价，提供24小时
-        "power_sale":0.5,
-        //卖电价格
-        "heat_price":100,
-        //供热价格，元/平方米
-        "cold_price":100,
-        //供冷价格，元/名方米
-        "hydrogen_price":20,
-        //氢价（元/kg）
-    },
+        "TOU_power":[0.6713,0.6713,0.6713,0.6713,0.6713,0.9935,0.9935,0.6713,0.6713,0.6713,0.3155,0.3155,0.3155,0.3155,0.3155,0.6713,0.6713,0.9935,0.9935,0.9935,0.9935,0.6713,0.6713,0.6713],
+        "power_sale":0.9,
+        "gas_price":1.2,
+        "heat_price":12,
+        "cold_price":16,
 
+
+        "hydrogen_price":30,
+        "capex_max":90000000
+    },
 ```
 
 ### 设备部分
@@ -296,27 +299,6 @@ ghp代表地源热泵设备，`power_max`代表最大规划容量，`power_min`�
         },
 ```
 
-### 运行模式部分
-
-`optimal`,`storage`,`isloate`分别代表最优，储能消纳和离网模式。其中储能消纳模式需要参数`sigma`代表储能消纳比例，`supply_time`代表储能可以供应负荷的持续时间，`pv_time`代表消纳光伏的时间。
-```
-    "mode":{
-        //运算模式
-        "optimal":1,
-        "storage":{
-            "select":1,
-            //是否选择本模式
-            "sigma":0.1,
-            //储能比例
-            "supply_time":4,
-            //供应负荷持续时间
-            "pv_time":4,
-            //消纳光伏时间
-        },
-        "isloate":1,
-        //0代表不算，1代表只计算规划模型，2代表规划和运行模型一并计算
-    },
-```
 
 
 ### 碳排放参数
@@ -333,9 +315,9 @@ ghp代表地源热泵设备，`power_max`代表最大规划容量，`power_min`�
     }
 ```
 
-## 程序输出
+## 计算程序输出
 
-输出参数如下
+输出参数如下，输出到doc文件夹下
 ```
 #并网规划输出
 grid_planning_output_json = {
