@@ -314,13 +314,18 @@ if __name__ == '__main__':
     #买电，卖电，买氢
 
     res1,grid_planning_output_json,grid_operation_output_json_plan,device_cap1 = planning_problem(dict_load, [1,1,1], input_json)
-    grid_operation_output_json = operating_problem(dict_load, device_cap1,[1,1,1],tem_env,input_json,8760)
-
+    grid_operation_output_json,flag = operating_problem(dict_load, device_cap1,[1,1,1],tem_env,input_json,8760)
+    if flag == 1:
+        print("grid_g")
+        grid_operation_output_json = grid_operation_output_json_plan
 
 
     res2,itgrid_planning_output_json,isloate_operation_output_json_plan,device_cap2 = planning_problem(dict_load, [0,1,1], input_json)
-    itgrid_operation_output_json = operating_problem(dict_load, device_cap2,[0,1,1],tem_env,input_json,8760)
-
+    pprint.pprint(device_cap2)
+    itgrid_operation_output_json,flag = operating_problem(dict_load, device_cap2,[0,1,1],tem_env,input_json,8760)
+    if flag == 1:
+        print("isloate_g")
+        itgrid_operation_output_json = isloate_operation_output_json_plan
     #print(111)
     print(grid_planning_output_json['equipment_cost'],grid_planning_output_json['receive_year'])
     print(itgrid_planning_output_json['equipment_cost'],itgrid_planning_output_json['receive_year'])
@@ -341,6 +346,6 @@ if __name__ == '__main__':
     save_json(grid_operation_output_json,"grid_operation_output_json")
     save_json(itgrid_planning_output_json,"itgrid_planning_output_json")
     save_json(itgrid_operation_output_json,"itgrid_operation_output_json")
-    #to_csv(res1,'test1' + '.xls')
-    #to_csv(res2,'test2' + '.xls')
+    to_csv(res1,'test1' + '.xls')
+    to_csv(res2,'test2' + '.xls')
 

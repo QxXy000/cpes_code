@@ -76,10 +76,10 @@ def season_operating_problem(dict_load,device_cap,isolate,tem_env,input_json,per
     u_ht_lower=0.5#储氢罐压强下限0.5MPa
     T_wt_upper=82#℃热水罐储水温度上限
     T_wt_lower=4#℃热水罐储水温度下限
-    T_ct_upper=21#℃冷水罐储水温度上限
-    T_ct_lower=4#℃冷水罐储水温度下限
+    T_ct_upper=25#℃冷水罐储水温度上限
+    T_ct_lower=3#℃冷水罐储水温度下限
     T_g_lower=55#℃供热温度下限
-    T_q_lower=7#℃供冷温度上限
+    T_q_lower=9#℃供冷温度上限
     
     c = 4.2/3600    #水的比热容，4.2KJ/(kg*K)，已转换成KWH
     ro_wt=1000  #水密度(kg/m3)
@@ -356,7 +356,7 @@ def season_operating_problem(dict_load,device_cap,isolate,tem_env,input_json,per
         probV6.addConstr(t_ct[i]<=T_ct_upper)#V6.5(43)
         probV6.addConstr(t_ct[i]>=T_ct_lower)
         probV6.addConstr(q_ghp[i]+q_hp[i]-q_inout[i]==q_demand[i])#V6.5(44)
-        probV6.addConstr(q_demand[i]==c*m_q[i]*(t_cr[i]-t_q[i]))
+        probV6.addConstr(q_demand[i]<=c*m_q[i]*(t_cr[i]-t_q[i]))
         probV6.addConstr(t_q[i]<=T_q_lower)
         probV6.addConstr(m_hp_q+m_ghp_q+z_ct[i]*m_cio==m_q[i])#V6.5(45)
         probV6.addConstr(m_hp_q*t_hp_q[i]+m_ghp_q*t_ghp_q[i]+z_ct[i]*m_cio*t_ct[i]==m_q[i]*t_q[i])#V6.5(46)
@@ -370,7 +370,7 @@ def season_operating_problem(dict_load,device_cap,isolate,tem_env,input_json,per
         #空气源热泵
         probV6.addConstr(c * m_hp_g * (t_hp_g[i]-t_r[i]) == yita_hp_g*p_hp[i])#V6.5(30)
         probV6.addConstr(p_hp[i]<=p_hp_nominal)
-        probV6.addConstr(g_hp[i] == yita_hp_g*p_hp[i])
+        probV6.addConstr(g_hp[i] <= yita_hp_g*p_hp[i])
         probV6.addConstr(c * m_hp_q * (t_cr[i]-t_hp_q[i]) == yita_hp_q*p_hp[i])#V6.5(31)
         probV6.addConstr(q_hp[i] == yita_hp_q*p_hp[i])
         
@@ -390,7 +390,7 @@ def season_operating_problem(dict_load,device_cap,isolate,tem_env,input_json,per
         probV6.addConstr(g_sts[i+1]-g_sts[i]==g_ghp_sts[i]-g_sts_ghp[i]+g_sts_in[i])#V6.5(39)
         
         #供热
-        g_tube[i]+g_ghp[i]==g_demand[i]#V6.5(40)
+        g_tube[i]+g_ghp[i]>=g_demand[i]#V6.5(40)
         
         probV6.addConstr(e_ce[i]==ele_load[i])
         probV6.addConstr(v_gas[i]==(g_demand[i]+q_demand[i]/1.35)/7.5)
@@ -403,21 +403,23 @@ def season_operating_problem(dict_load,device_cap,isolate,tem_env,input_json,per
     print("It has reached here")
     
     probV6.params.NonConvex = 2
-    probV6.params.MIPGap = 0.01
+    probV6.params.MIPGap = 0.05
 
     try:
         probV6.optimize()
     except gp.GurobiError:
         print("Optimize failed due to non-convexity")
+        
     print(probV6.status)
     print("----")
     #input()
     if probV6.status == GRB.INFEASIBLE or probV6.status == 4:
         print('Model is infeasible111')
+        return 1,1,1,1
         probV6.computeIIS()
         probV6.write('model.ilp')
         print("Irreducible inconsistent subsystem is written to file 'model.ilp'")
-
+        
     #prob.solve(pulp.GUROBI_CMD(options=[('MIPgap',0.0001)]))
 
     #print('status:', pulp.LpStatus[prob.status])
@@ -451,11 +453,11 @@ def season_operating_problem(dict_load,device_cap,isolate,tem_env,input_json,per
     opex=probV6.objVal
     #print(ce_h.X,opex,res)
     #exit(0)
-    return ce_h.X,opex,res
+    return ce_h.X,opex,res,0
 
 def operating_problem(dict_load,device_cap,isolate,tem_env,input_json,period):
     # isloate 0表示并网，1表示离网
-    area = 300000#总面积
+    area = input_json['load']['load_area']#总面积
     #参数先常数
 
     #第一步，计算 传统 电气系统 和 电系统 的 运行成本， 碳排放
@@ -469,15 +471,19 @@ def operating_problem(dict_load,device_cap,isolate,tem_env,input_json,period):
     co2_ele_gas=sum(dict_load['ele_load'])*input_json['carbon']['alpha_e']+sum(gas_sum_ele_gas)*1.535
 
     #分别算四个季节的运行程序，得到碳排放和运行成本，算一个一年的运行成本和碳排放。
-    dict_spring={'ele_load':dict_load['ele_load'][800:800+7*24],'g_demand':dict_load['g_demand'][800:800+7*24],'q_demand':dict_load['q_demand'][800:800+7*24],'r_solar':dict_load['r_solar'][800:800+7*24]}
-    dict_summer={'ele_load':dict_load['ele_load'][800:800+7*24],'g_demand':dict_load['g_demand'][800:800+7*24],'q_demand':dict_load['q_demand'][800:800+7*24],'r_solar':dict_load['r_solar'][800:800+7*24]}
-    dict_autumn={'ele_load':dict_load['ele_load'][800:800+7*24],'g_demand':dict_load['g_demand'][800:800+7*24],'q_demand':dict_load['q_demand'][800:800+7*24],'r_solar':dict_load['r_solar'][800:800+7*24]}
-    dict_winter={'ele_load':dict_load['ele_load'][800:800+7*24],'g_demand':dict_load['g_demand'][800:800+7*24],'q_demand':dict_load['q_demand'][800:800+7*24],'r_solar':dict_load['r_solar'][800:800+7*24]}
+    dict_spring={'ele_load':dict_load['ele_load'][3288:3288+7*24],'g_demand':dict_load['g_demand'][3288:3288+7*24],'q_demand':dict_load['q_demand'][3288:3288+7*24],'r_solar':dict_load['r_solar'][3288:3288+7*24]}
+    dict_summer={'ele_load':dict_load['ele_load'][6192:6192+7*24],'g_demand':dict_load['g_demand'][6192:6192+7*24],'q_demand':dict_load['q_demand'][6192:6192+7*24],'r_solar':dict_load['r_solar'][6192:6192+7*24]}
+    dict_autumn={'ele_load':dict_load['ele_load'][7656:7656+7*24],'g_demand':dict_load['g_demand'][7656:7656+7*24],'q_demand':dict_load['q_demand'][7656:7656+7*24],'r_solar':dict_load['r_solar'][7656:7656+7*24]}
+    dict_winter={'ele_load':dict_load['ele_load'][360:360+7*24],'g_demand':dict_load['g_demand'][360:360+7*24],'q_demand':dict_load['q_demand'][360:360+7*24],'r_solar':dict_load['r_solar'][360:360+7*24]}
 
-    ce_h_spring,opex_spring,res_spring = season_operating_problem(dict_spring,device_cap,isolate,tem_env,input_json,7*24)
-    ce_h_summer,opex_summer,res_summer = season_operating_problem(dict_summer,device_cap,isolate,tem_env,input_json,7*24)
-    ce_h_autumn,opex_autumn,res_autumn = season_operating_problem(dict_autumn,device_cap,isolate,tem_env,input_json,7*24)
-    ce_h_winter,opex_winter,res_winter = season_operating_problem(dict_winter,device_cap,isolate,tem_env,input_json,7*24)
+    ce_h_spring,opex_spring,res_spring,flag1 = season_operating_problem(dict_spring,device_cap,isolate,tem_env,input_json,7*24)
+    ce_h_summer,opex_summer,res_summer,flag2 = season_operating_problem(dict_summer,device_cap,isolate,tem_env,input_json,7*24)
+    ce_h_autumn,opex_autumn,res_autumn,flag3 = season_operating_problem(dict_autumn,device_cap,isolate,tem_env,input_json,7*24)
+    ce_h_winter,opex_winter,res_winter,flag4 = season_operating_problem(dict_winter,device_cap,isolate,tem_env,input_json,7*24)
+    print(flag1,flag2,flag3,flag4)
+    #exit(0)
+    if flag1 == 1 or flag2 == 1 or flag3 ==1 or flag4 ==1:
+        return 0,1
     opex_sum=(opex_spring+opex_summer+opex_autumn+opex_winter)*12
     ce_sum=(ce_h_spring+ce_h_summer+ce_h_autumn+ce_h_winter)*12
     
@@ -494,4 +500,4 @@ def operating_problem(dict_load,device_cap,isolate,tem_env,input_json,period):
             "cer":format(co2_ele_only-ce_sum,'.4f')
     }
 
-    return output_json
+    return output_json,0

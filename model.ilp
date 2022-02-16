@@ -1,67 +1,24 @@
-\ Model OperatingModelV6_copy
+\ Model mip1_copy
 \ LP format - for model browsing. Use MPS format to capture full model detail.
 Minimize
  
 Subject To
- R415: - g_stc3 - 5.833333333333334 t_r3 + 5.833333333333334 t_stc_ex3 = 0
- R440: 10000 z_fcth3 + 5000 z_stc_ex3 + 26160.28117031659 z_wt3 - m_tube3
-   = -2064.052566413115
- R441: 1e+09 z_stc_ex3 - t_stc_ex3 + w_ht_stc_ex3 <= 1e+09
- R442: - 1e+09 z_stc_ex3 - t_stc_ex3 + w_ht_stc_ex3 >= -1e+09
- R5209: - 54.83333333333334 t_stc43 + 58.33333333333334 t_stc44
-   + 6.140350877192983 w_stc_ex43 = 146.34
- R14762: p_g123 <= 0
- R14765: p_g123 - p_u123 + p_fc123 - p_el123 - p_co123 - p_eb123 - p_hp123
-   - p_ghp123 - p_slack123 = 126.8633331374035
- R14780: - 0.91 z_fcc123 + r_ec123 >= 0
- R14783: - 0.252 z_fcb123 - 0.94 r_mb123 + r_eb123 = 0
- R14786: p_fc123 - 141.6045546084597 r_ea123 - 141.6045546084597 r_eb123
-   - 141.6045546084597 r_ec123 = 0
- R14788: - 0.21 z_fca123 + r_ga123 <= 0
- R14793: - 0.7 r_ma123 + r_ga123 = 0
- R14795: 0.27 z_fcc123 - 1.27 r_mc123 + r_gc123 = 0
- R14798: 1e+09 p_fc123 - 1.65 r_ma123 - 1.65 r_mb123 - 1.65 r_mc123
-   + r_ea123 + r_eb123 + r_ec123 <= 1.4160455460845969e+11
- R14800: 1e+09 p_fc123 - 1.65 r_ma123 - 1.65 r_mb123 - 1.65 r_mc123
-   + 2.19 r_ga123 + 2.19 r_gb123 + 2.19 r_gc123 <= 1.4160455460845969e+11
- R15289: - 54.83333333333334 t_stc127 + 58.33333333333334 t_stc128
-   + 6.140350877192983 w_stc_ex127 = 92.435
- R18440: 10000 z_fcth153 + 5000 z_stc_ex153 + 26160.28117031659 z_wt153
-   - m_tube153 = -2064.052566413115
- qc0: g_sts_in3 + g_tube3 + [ 0.00116666666666667 m_tube3 * t_r3
-   - 0.00116666666666667 m_tube3 * t_tube3 ] = 0
- qc1: 2064.052566413115 t_hp_g133 + 5000 w_ht_stc_ex133
-   + 10000 w_ht_fc_ex133 + 26160.28117031659 w_ht_wt133 + [
-   - m_tube133 * t_tube133 ] = 0
+ R8801: 2000 s_pv + 2000 s_sc + 3000 num_gtw + 3000 p_hp_max
+   + 4000 p_hpg_max + 500 p_eb_max + 0.5 m_ht + 0.5 m_ct + 10000 p_fc_max
+   + 10000 p_el_max + 3000 hst <= 4e+08
+ R202095: p_pur7159 <= 0
+ R202101: p_fc7159 - p_fc_max <= 0
+ R202113: p_co7159 - 1.399 h_el7159 = 0
+ R202118: p_hp7159 + p_hpc7159 + p_hpg7159 + p_hpgc7159 + p_eb7159
+   + p_co7159 - p_pv7159 - p_fc7159 + p_el7159 - p_pur7159 + p_sol7159
+   = -51247.36548606704
+ R202119: - 0.05565 s_pv + p_pv7159 = 0
 Bounds
- -infinity <= g_stc3 <= 400
- g_sts_in3 free
- g_tube3 free
- m_tube3 free
- m_tube133 free
- m_tube153 free
- p_g123 free
- p_fc123 free
- r_ma123 free
- r_mc123 free
- r_eb123 free
- r_ec123 free
- r_ga123 free
- t_r3 free
- t_stc43 free
- t_stc44 free
- t_stc127 free
- t_stc128 free
- t_stc_ex3 free
- t_hp_g133 free
- t_tube3 free
- t_tube133 free
- w_stc_ex43 free
- w_stc_ex127 free
- w_ht_stc_ex133 free
- w_ht_fc_ex133 free
- w_ht_wt133 free
-Binaries
- z_fca123 z_fcb123 z_fcc123 z_fcth3 z_fcth153 z_stc_ex3 z_stc_ex153 z_wt3
- z_wt153
+ p_co7159 free
+ p_pv7159 free
+ p_fc7159 free
+ p_fc_max free
+ p_pur7159 free
+Generals
+ num_gtw
 End

@@ -45,6 +45,13 @@ def model_linear_cost(m,x1,x2,y1,y2,y3,power,capex):
 
 def planning_problem(dict,isloate,input_json):
     t0 = time.time()
+    alpha_e = 0.5839#电网排放因子kg/kWh
+    alpha_gas = 1.535#天然气排放因子kg/Nm3
+    #alpha_heat = 0.351
+    alpha_H2=1.74#氢排放因子
+    alpha_eo=0.8922#减排项目基准排放因子
+    gas_price = 1.2
+
     #lambda_ele_in = [0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.7, 1, 1, 1, 1,
     #                 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 1.2, 1.2, 1.2, 1.2, 1.2, 0.4]*365
     #0.9935,0.6713,0.53,0.3155,
@@ -178,7 +185,7 @@ def planning_problem(dict,isloate,input_json):
     num_gtw = m.addVar(vtype=GRB.INTEGER,lb=0,name='num_gtw')
     # Create variables
 
-    #ce_h = m.addVar(vtype=GRB.CONTINUOUS, lb=0, name="ce_h")
+    ce_h = m.addVar(vtype=GRB.CONTINUOUS, lb=0, name="ce_h")
 
     #m_ht = m.addVar(vtype=GRB.CONTINUOUS, lb=10, name="m_ht") # capacity of hot water tank
 
@@ -219,9 +226,9 @@ def planning_problem(dict,isloate,input_json):
 
     t_ht = [m.addVar(vtype=GRB.CONTINUOUS, lb=55, ub = 90 ,name=f"t_ht{t}") for t in range(period)] # temperature of hot water tank
 
-    m_ht = m.addVar(vtype=GRB.CONTINUOUS, lb=0,ub = 1800000, name=f"m_ht")
+    m_ht = m.addVar(vtype=GRB.CONTINUOUS, lb=0, name=f"m_ht")
 
-    m_ct = m.addVar(vtype=GRB.CONTINUOUS, lb=0,ub = 1800000, name=f"m_ct")
+    m_ct = m.addVar(vtype=GRB.CONTINUOUS, lb=0, name=f"m_ct")
 
     t_ct = [m.addVar(vtype=GRB.CONTINUOUS, lb=2 , ub = 9, name=f"t_ct{t}") for t in range(period)] # temperature of cold water tank
 
@@ -349,10 +356,10 @@ def planning_problem(dict,isloate,input_json):
     #m.addConstr(h_ssto[-1] == h_ssto[0])
     m.addConstr(gp.quicksum(q_hpg)-gp.quicksum(p_hpgc)+gp.quicksum(g_hpg_gr) == gp.quicksum(g_hpg)-gp.quicksum(p_hpg))
     #piecewise price
-    m = model_linear_cost(m,300,600,10,310,439,p_el_max,capex_el)
-    m = model_linear_cost(m,300,600,10,310,490,p_fc_max,capex_fc)
+    m = model_linear_cost(m,300,600000,10,310,439000,p_el_max,capex_el)
+    m = model_linear_cost(m,300,600000,10,310,490000,p_fc_max,capex_fc)
     #m.addConstr(s_pv*cost_pv +s_sc*cost_sc +p_hpg_max*cost_hpg +cost_gtw*num_gtw +cost_ht*m_ht+cost_ht*m_ct+cost_hst*hst+cost_eb*p_eb_max+cost_hp*p_hp_max+cost_fc*p_fc_max+cost_el*p_el_max + 10*gp.quicksum([p_pur[i]*lambda_ele_in[i] for i in range(period)])-10*gp.quicksum(p_sol)*lambda_ele_out+10*lambda_h*gp.quicksum(h_pur)+954>=0 ) 
-    m.addConstr(s_pv*cost_pv +s_sc*cost_sc +p_hpg_max*cost_hpg +cost_gtw*num_gtw +cost_ht*m_ht+cost_ht*m_ct+cost_hst*hst+cost_eb*p_eb_max+cost_hp*p_hp_max+cost_fc*p_fc_max+cost_el*p_el_max <= input_json['price']['capex_max'])
+    m.addConstr(s_pv*cost_pv +s_sc*cost_sc +p_hpg_max*cost_hpg +cost_gtw*num_gtw +cost_ht*m_ht+cost_ht*m_ct+cost_hst*hst+cost_eb*p_eb_max+cost_hp*p_hp_max+cost_fc*p_fc_max+cost_el*p_el_max <= input_json['price']['capex_max'][1-isloate[0]])
     for i in range(period):
         #电网
         m.addConstr(p_pur[i] <= 1000000000*(isloate[0]))
@@ -433,13 +440,13 @@ def planning_problem(dict,isloate,input_json):
     m.params.MIPGap = 0.01
     # m.optimize()
     #print(m.status)
-
+    m.addConstr(ce_h==gp.quicksum(h_pur)*alpha_H2+gp.quicksum(p_pur)*alpha_e)
     try:
         m.optimize()
     except gp.GurobiError:
         print("Optimize failed due to non-convexity")
     #print([p_eb[i].X for i in range(period)])
-    if m.status == GRB.INFEASIBLE:
+    if m.status == GRB.INFEASIBLE or m.status == 4:
         print('Model is infeasible')
         m.computeIIS()
         m.write('model.ilp')
@@ -522,12 +529,33 @@ def planning_problem(dict,isloate,input_json):
             'p_co': p_co_max.X,  #氢压机功率/kw
     }
     #运行后的输出
+    # operation_output_json = {
+    #         "operation_cost": op_sum,  # 年化运行成本/万元
+    #         "cost_save_rate": (op_c-op_sum)/op_c,  #运行成本节约比例
+    #         "co2":0,  #总碳排/t
+    #         "cer":0,  #碳减排率
+    #         "cer_perm2":200  #每平米的碳减排量/t
+    # }
+    #第一步，计算 传统 电气系统 和 电系统 的 运行成本， 碳排放
+
+    lambda_ele_in = input_json['price']['TOU_power']*365
+    ele_sum_ele_only=np.array(ele_load)+np.array(g_demand)/input_json['device']['eb']['beta_eb']+np.array(q_demand)/input_json['device']['hp']['beta_hpq']
+    gas_sum_ele_gas=(np.array(g_demand)+np.array(q_demand)/1.35)/7.5
+    opex_ele_only=sum(np.array(lambda_ele_in)*ele_sum_ele_only)
+    opex_ele_gas=sum(np.array(lambda_ele_in)*np.array(ele_load))+sum(gas_sum_ele_gas*gas_price)
+    co2_ele_only=sum(ele_sum_ele_only)*input_json['carbon']['alpha_e']
+    co2_ele_gas=sum(ele_load)*input_json['carbon']['alpha_e']+sum(gas_sum_ele_gas)*1.535
+
     operation_output_json = {
-            "operation_cost": op_sum,  # 年化运行成本/万元
-            "cost_save_rate": (op_c-op_sum)/op_c,  #运行成本节约比例
-            "co2":0,  #总碳排/t
-            "cer":0,  #碳减排率
-            "cer_perm2":200  #每平米的碳减排量/t
+            "operation_cost": format(op_sum,'.2f'),  # 年化运行成本/万元
+            "cost_save_rate": format((opex_ele_only-op_sum)/opex_ele_only,'.4f'),  #电运行成本节约比例
+            "cost_save_rate_gas": format((opex_ele_gas-op_sum)/opex_ele_gas,'.4f'),  #电气运行成本节约比例
+            "co2":format(ce_h.X,'.2f'),  #总碳排/t
+            "cer_rate":format((co2_ele_only-ce_h.X)/co2_ele_only,'.4f'),  #与电系统相比的碳减排率
+            "cer_gas":format((co2_ele_gas-ce_h.X)/co2_ele_gas,'.4f'), #与电气系统相比的碳减排率
+            "cer_perm2":format((co2_ele_only-ce_h.X)/input_json['load']['load_area'],'.2f'),  #电系统每平米的碳减排量/t
+            "cer_perm2_gas":format((co2_ele_gas-ce_h.X)/input_json['load']['load_area'],'.2f'),  #电气系统每平米的碳减排量/t
+            "cer":format(co2_ele_only-ce_h.X,'.4f')
     }
     return {'objective':m.objVal,
             'process time':time.time() - t0,
