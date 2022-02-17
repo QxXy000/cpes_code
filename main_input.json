@@ -1,16 +1,16 @@
 {
     "load":{
         "building_area":{
-            "apartment":0,
+            "apartment":1.5,
             "hotel":0,
-            "office":1,
-            "restaurant":0
+            "office":11,
+            "restaurant":0.5
         },
-        "load_area":420000,
+        "load_area":130000,
         "heat_mounth":[1,2,12],
         "cold_mounth":[6,7,8,9],
         "power_peak":0,
-        "yearly_power":0,
+        "yearly_power":2000000,
         "load_proportion":{
             "ele":0,
             "heat":0,
@@ -21,18 +21,18 @@
     "renewable_energy":{
         "pv_existst":0,
         "sc_existst":0,
-        "pv_sc_max":300000
+        "pv_sc_max":20000
     },
     "price":{
         "TOU_power":[0.3123,0.3123,0.3123,0.3123,0.3123,0.3123,0.3123,0.6507,0.6507,0.9695,0.9695,0.9695,0.9695,0.9695,0.9695,0.6507,0.6507,0.6507,0.6507,0.6507,1.1713,1.1713,0.6507,0.3123],
-        "power_sale":0.9,
+        "power_sale":0.3,
         "gas_price":4.085,
         "heat_price":10,
         "cold_price":16,
 
 
         "hydrogen_price":30,
-        "capex_max":[400000000,10000000000]
+        "capex_max":[20000000,2000000000]
     },
 
     "device":{

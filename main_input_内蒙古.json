@@ -1,0 +1,181 @@
+{
+    "load":{
+        "building_area":{
+            "apartment":0,
+            "hotel":0,
+            "office":1,
+            "restaurant":0
+        },
+        "load_area":12000,
+        "heat_mounth":[1,2,3,10,11,12],
+        "cold_mounth":[6,7,8,9],
+        "power_peak":0,
+        "yearly_power":0,
+        "load_proportion":{
+            "ele":0,
+            "heat":0,
+            "cold":0
+        },
+        "location":[110,41]
+    },
+    "renewable_energy":{
+        "pv_existst":0,
+        "sc_existst":0,
+        "pv_sc_max":476190
+    },
+    "price":{
+        "TOU_power":[0.6713,0.6713,0.6713,0.6713,0.6713,0.9935,0.9935,0.6713,0.6713,0.6713,0.3155,0.3155,0.3155,0.3155,0.3155,0.6713,0.6713,0.9935,0.9935,0.9935,0.9935,0.6713,0.6713,0.6713],
+        "power_sale":0.9,
+        "gas_price":1.2,
+        "heat_price":12,
+        "cold_price":16,
+
+
+        "hydrogen_price":30,
+        "capex_max":90000000
+    },
+
+    "device":{
+        "co":
+            {
+                "power_max":5000,
+                "power_min":0,
+                "cost":1000,
+                "crf":10,
+
+                "beta_co":1.399
+            },
+        "fc":
+            {
+                "power_max":10000,
+                "power_min":0,
+                "cost":10000,
+                "crf":10,
+
+                "eta_fc_p":15,
+                "eta_ex_g":16.6,
+                "theta_ex":0.95
+
+            },
+        "ht":
+            {
+                "water_max":1800000,
+                "water_min":0,
+                "cost":0.5,
+                "crf":20,
+
+                "t_max":82,
+                "t_min":4,
+                "t_supply":55,
+                "miu_loss":0.02
+            },
+
+        "eb":
+            {
+                "power_max":10000,
+                "power_min":0,
+                "cost":500,
+                "crf":10,
+
+                "beta_eb":0.9
+            },
+        "hp":
+            {
+                "power_max":10000,
+                "power_min":0,
+                "cost":3000,
+                "crf":15,
+
+                "beta_hpg":3,
+                "beta_hpq":4
+            },
+
+        "ghp":
+            {
+                "power_max":10000,
+                "power_min":0,
+                "cost":4000,
+                "crf":15,
+
+                "beta_ghpg":3.54,
+                "beta_ghpq":4
+            },
+
+        "gtw":
+            {
+                "number_max":200,
+                "cost":3000,
+                "crf":30,
+
+                "beta_gtw":7
+            },
+        "ct":
+            {
+                "water_max":1800000,
+                "water_min":0,
+                "cost":0.5,
+                "crf":15,
+
+                "t_max":21,
+                "t_min":4,
+                "t_supply":7,
+                "miu_loss":0.9
+            },
+        "hst":
+            {
+                "sto_max":50000,
+                "sto_min":0,
+                "cost":3000,
+                "crf":15,
+
+                "inout_max":500,
+                "U_max":350,
+                "U_min":5
+            },
+
+        "el":
+            {
+                "power_max":5000,
+                "power_min":0,
+                "cost":10000,
+                "crf":7,
+
+                "beta_el":0.023,
+
+                "500RtV":0,
+                "U_max":200,
+                "U_min":20
+            },
+        "sc":
+            {
+                "area_max":10000,
+                "area_min":0,
+                "cost":2000,
+                "crf":20,
+
+                "beta_sc":0.72,
+                "theta_ex":0.9,
+                "a_stc":100,
+                "miu_loss":0.0064
+            },
+
+        "pv":
+            {
+                "area_max":476190,
+                "area_min":0,
+                "cost":2000,
+                "crf":20,
+
+                "beta_pv":0.21
+            }
+
+
+    },
+
+    "carbon":{
+        "alpha_h2":1.74,
+        "alpha_e":0.5839,
+        "alpha_EO":0.8922,
+        "alpha_gas":1.535
+    }
+}
