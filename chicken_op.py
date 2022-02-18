@@ -489,7 +489,7 @@ def operating_problem(dict_load,device_cap,isolate,tem_env,input_json,period):
     
     #第三步算结果
     output_json = {
-            "operation_cost": format(opex_sum,'.2f'),  # 年化运行成本/万元
+            "operation_cost": format(opex_sum/10000,'.2f'),  # 年化运行成本/万元
             "cost_save_rate": format((opex_ele_only-opex_sum)/opex_ele_only,'.4f'),  #电运行成本节约比例
             "cost_save_rate_gas": format((opex_ele_gas-opex_sum)/opex_ele_gas,'.4f'),  #电气运行成本节约比例
             "co2":format(ce_sum,'.2f'),  #总碳排/t

@@ -511,7 +511,7 @@ def planning_problem(dict,isloate,input_json):
             'area_sc': format(s_sc.X,'.2f'),  # 集热器面积/m2
             'p_co': format(p_co_max.X,'.2f'),  #氢压机功率/kw
 
-            "equipment_cost": format(cap_sum,'.2f'),  #设备总投资/万元
+            "equipment_cost": format(cap_sum/10000,'.2f'),  #设备总投资/万元
             "receive_year": format(cap_sum/(revenue-op_sum),'.2f'),  # 投资回报年限/年
     }
     device_cap = {
@@ -547,7 +547,7 @@ def planning_problem(dict,isloate,input_json):
     co2_ele_gas=sum(ele_load)*input_json['carbon']['alpha_e']+sum(gas_sum_ele_gas)*1.535
 
     operation_output_json = {
-            "operation_cost": format(op_sum,'.2f'),  # 年化运行成本/万元
+            "operation_cost": format(op_sum/10000,'.2f'),  # 年化运行成本/万元
             "cost_save_rate": format((opex_ele_only-op_sum)/opex_ele_only,'.4f'),  #电运行成本节约比例
             "cost_save_rate_gas": format((opex_ele_gas-op_sum)/opex_ele_gas,'.4f'),  #电气运行成本节约比例
             "co2":format(ce_h.X,'.2f'),  #总碳排/t
