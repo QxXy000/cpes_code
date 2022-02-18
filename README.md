@@ -25,7 +25,7 @@
 
 ### 负荷部分
 
-输入,`building_area`为各个类型房屋的比例；`heat_mounth,cold_mounth`为供热和供冷的月份，`power_peak`为峰值电负荷，缺省为0;`yearly_power`为年用电总量;`load_area`为总用能面积，非常关键;`load_proportion`为电热冷负荷的比例，缺省为0，还未实现;`location`为坐标经纬度，第一个为经度，第二个为纬度。用于获取当地光照水平以及供暖条件；。
+输入,`building_area`为各个类型房屋的比例；`heat_mounth,cold_mounth`为供热和供冷的月份，`power_peak`为峰值电负荷，缺省为0;`yearly_power`为年用电总量;`load_area`为总用能面积，非常关键;`load_proportion`为电热冷负荷的比例，缺省为0，还未实现;`ele_type`如果为1，代表冷热负荷与总电量无关，只与面积有关，如果为0代表冷热负荷与总电量有关。  `location`为坐标经纬度，第一个为经度，第二个为纬度。用于获取当地光照水平以及供暖条件；。
 ```
     "load":{
         "building_area":{
@@ -38,6 +38,7 @@
         "cold_mounth":[6,7,8,9],
         "power_peak":0,
         "yearly_power":0,
+        "ele_type":1,
         "load_area":12000,
         "load_proportion":{
             "ele":0,

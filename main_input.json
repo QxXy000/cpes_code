@@ -11,6 +11,7 @@
         "cold_mounth":[6,7,8,9],
         "power_peak":0,
         "yearly_power":2000000,
+        "ele_type":0,
         "load_proportion":{
             "ele":0,
             "heat":0,
