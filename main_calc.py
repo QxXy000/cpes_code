@@ -173,8 +173,9 @@ def get_load_new(load_dict):
         for row in renew:
 
             r_solar[i] += float(row['electricity'])
+    
             i+=1
-
+    r_solar = r_solar[-8:]+r_solar[:-8]
     if load_dict["yearly_power"] !=0:
         #print(1)
         if load_dict["ele_type"] == 0:

@@ -7,28 +7,26 @@
             "restaurant":0.5
         },
         "load_area":130000,
-        "heat_mounth":[1,2,12],
-        "cold_mounth":[6,7,8,9],
+        "heat_mounth":[1,2,3,10,11,12],
+        "cold_mounth":[],
         "power_peak":0,
-        "yearly_power":2000000,
         "ele_type":0,
-        "location":[110,31]
+        "yearly_power":0,
+        "location":[109,40]
     },
     "renewable_energy":{
         "pv_existst":0,
         "sc_existst":0,
-        "pv_sc_max":20000
+        "pv_sc_max":1500000
     },
     "price":{
         "TOU_power":[0.3123,0.3123,0.3123,0.3123,0.3123,0.3123,0.3123,0.6507,0.6507,0.9695,0.9695,0.9695,0.9695,0.9695,0.9695,0.6507,0.6507,0.6507,0.6507,0.6507,1.1713,1.1713,0.6507,0.3123],
-        "power_sale":0.3,
+        "power_sale":0.4,
         "gas_price":4.085,
         "heat_price":10,
         "cold_price":16,
-
-
         "hydrogen_price":30,
-        "capex_max":[20000000,2000000000]
+        "capex_max":[200000000000000000,200000000000000000000]
     },
 
     "device":{
@@ -144,7 +142,7 @@
             },
         "sc":
             {
-                "area_max":1000000,
+                "area_max":1500000,
                 "area_min":0,
                 "cost":2000,
                 "crf":20,
@@ -157,7 +155,7 @@
 
         "pv":
             {
-                "area_max":300000,
+                "area_max":1500000,
                 "area_min":0,
                 "cost":2000,
                 "crf":20,
